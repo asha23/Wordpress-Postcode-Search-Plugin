@@ -1,6 +1,5 @@
 <?php
 
-
 $main_api = get_option('map_option_1');
 
 class ipsWrapper { 
@@ -16,8 +15,6 @@ class ipsWrapper {
 	public function __construct() {
 		$this->api_key = get_option('map_option_1');
 	}
-
-	//protected $apiKey = '1474237d7268b95b0546f4b9ba15698e'; 
 
     //API endpoints 
     private $endPoint = array( 

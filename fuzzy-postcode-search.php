@@ -19,6 +19,8 @@ require_once(dirname(__FILE__) . '/classes/postcode.io.class.php');
 require_once(dirname(__FILE__) . '/classes/ipstack.class.php');
 
 // Admin menu
+// ------------------
+
 require_once(dirname(__FILE__) . '/inc/admin.menu.php');
 
 add_shortcode('user_search','custom_postcode_search');
@@ -34,6 +36,9 @@ function custom_postcode_search($atts = null){
 
 		global $wpdb;
 
+		// Get information from the form.
+		// ------------------
+
 		$metakey = $_GET['search_by'];
 		$language_key = $_GET['lang_value'];
 		$city_key = $_GET['city_value'];
@@ -45,16 +50,17 @@ function custom_postcode_search($atts = null){
 		*/ 
 
 		// Get user ip
+		// ------------------
+
 		$ip = $_SERVER['HTTP_CLIENT_IP']? $_SERVER['HTTP_CLIENT_IP'] : ($_SERVER['HTTP_X_FORWARDE‌​D_FOR'] ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR']);
 
+		// Work out location information based on the user's ip address.
+		// ------------------
+		
 		$ips = new ipsWrapper(); 
-
 		$ips->setEndPoint('api'); 
-
 		$ips->ipnum = $ip; 
-
 		$ips->getResponse(); 
-
 		$ip_num = $ips->ipnum;
 		$ip_phone = $ips->response->country_name;
 		$ip_region = $ips->response->region_name;
@@ -71,7 +77,7 @@ function custom_postcode_search($atts = null){
 		$pc = $ips->response->zip;
 
 		// Do the search
-		// =====================================
+		// ------------------
 
 		$args = array(
 			'meta_query' => array(
@@ -100,9 +106,8 @@ function custom_postcode_search($atts = null){
 		if($users && $language_key != ""):
 			foreach($users as $user):
 
-				/*  
-					Use Google to work out the distance between 2 postcodes (by road)
-				*/
+				// Get meta information from the database array
+				// ------------------
 
 				$first_name = $user->first_name;
 				$last_name = $user->last_name;
@@ -114,13 +119,15 @@ function custom_postcode_search($atts = null){
 
 				// Calculate the postcode distances
 				// This uses postcode.io.class.php 
+				// ------------------
 
 				$postcode = new Postcode();
 				$distance = $postcode->distance($pc, $post_code, "M");
 
 				$distance = round($distance);
 
-				// Calculate if this user will travel that far.
+				// Calculate if this user will travel that far based on their options.
+				// ------------------
 
 				if($miles_to_travel > $distance):
 					$addition = $distance . ' miles.';
@@ -128,7 +135,13 @@ function custom_postcode_search($atts = null){
 					$addition = '<span style="color:red"><i class="fas fa-exclamation-circle"></i> ' . $distance . ' miles.</span><br><span class="tiny">This member has specified that they will only travel ' . $miles_to_travel . ' miles from their location.</span>';
 				endif;
 
+				// Get the author url
+				// ------------------
+
 				$url = get_author_posts_url($user->ID);
+
+				// do some string manipulation on the languages spoken from the database
+				// ------------------
 
 				$lang_string = $user->languages_spoken;
 
@@ -181,6 +194,7 @@ function user_search_form() {
 
 
 	// Get the county fields (This is from all activated users)
+	// ------------------
 
 	$all_user_query = new WP_User_Query( array('meta_key' => 'main_county', 
 												'meta_value' => '' , 
@@ -207,12 +221,14 @@ function user_search_form() {
 		$language_list[] = $user->languages_spoken;
 
 		// Get the language list based on all current users.
+		// ------------------
 
 		foreach($language_list as $lang):
 			
 			$lang_string = $lang;
 	
 			// Do some string manipulation - WP adds the countries in an odd string format.
+			// ------------------
 
 			$lang_string = str_replace('["', '',  $lang_string);
 			$lang_string = str_replace('"', '',  $lang_string);
@@ -228,6 +244,7 @@ function user_search_form() {
 		endforeach;
 	
 		// Create an array with the user id as key
+		// ------------------
 
 		$user_output[] = array(
 			'user_id' => $user_id,
@@ -243,6 +260,7 @@ function user_search_form() {
 
 	// Do the form
 	// Create the languages dropdown data
+	// ------------------
 
 	foreach($user_output as $lang_output) :
 		$languages[] = $lang_output['languages'];
@@ -254,6 +272,7 @@ function user_search_form() {
 	$metavalue = $metakey = '';
 
 	// Not currently used
+	// ------------------
 
 	// foreach($user_output as $city_output):
 	// 	$cities[] = $city_output['city'];
@@ -277,6 +296,9 @@ function user_search_form() {
 		$metavalue_lang = $_GET['lang_value'];
 	endif;
 
+	// Not currently used
+	// ------------------
+
 	// if (isset($_GET['city_value'])) :
 	// 	$metavalue_city = $_GET['city_value'];
 	// endif;
@@ -284,6 +306,11 @@ function user_search_form() {
 	// if (isset($_GET['county_value'])) :
 	// 	$metavalue_county= $_GET['county_value'];
 	// endif;
+
+	// ------------------
+
+	// Do the form itself
+	// ------------------
 
 	$re = '
 		<div class="fs_user_search">
